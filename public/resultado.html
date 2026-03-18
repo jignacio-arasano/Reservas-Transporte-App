@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resultado · Reserva</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080c14; --bg2: #0f1522; --bg3: #161e30;
+      --border: rgba(255,255,255,.08); --amber: #f0a500;
+      --green: #22c55e; --red: #ef4444; --text: #f0f4ff; --text2: #8494b0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .card {
+      position: relative;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 24px; padding: 48px 40px;
+      max-width: 420px; width: 100%; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      animation: pop .4s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes pop {
+      from { opacity: 0; transform: scale(.9); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .result-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; margin: 0 auto 24px;
+    }
+    .icon-success { background: rgba(34,197,94,.15); border: 2px solid rgba(34,197,94,.3); }
+    .icon-error   { background: rgba(239,68,68,.15);  border: 2px solid rgba(239,68,68,.3); }
+    .icon-pending { background: rgba(240,165,0,.15);  border: 2px solid rgba(240,165,0,.3); }
+
+    h1 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 10px; }
+    p  { color: var(--text2); font-size: .9rem; line-height: 1.6; }
+
+    .badge {
+      display: inline-block; margin-top: 20px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 20px;
+      font-family: 'Syne', sans-serif; font-size: .85rem; font-weight: 700;
+      color: var(--amber); letter-spacing: .05em;
+    }
+
+    .btn {
+      display: block; margin-top: 28px; padding: 14px;
+      background: var(--amber); color: #000; border: none;
+      border-radius: 12px; text-decoration: none;
+      font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700;
+      cursor: pointer; transition: all .2s;
+      box-shadow: 0 4px 20px rgba(240,165,0,.3);
+    }
+    .btn:hover { background: #ffbe2e; transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="result-icon" id="ico">⏳</div>
+  <h1 id="titulo">Procesando...</h1>
+  <p id="desc">Verificando tu pago</p>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const path   = window.location.pathname;
+const resId  = params.get('reserva_id');
+const isDemo = params.get('demo') === '1';
+const card   = document.getElementById('card');
+
+if (path === '/success') {
+  document.getElementById('ico').className = 'result-icon icon-success';
+  document.getElementById('ico').textContent = '🎉';
+  document.getElementById('titulo').textContent = '¡Reserva confirmada!';
+  document.getElementById('desc').textContent = isDemo
+    ? 'Tu asiento fue reservado correctamente en modo demo.'
+    : 'Tu pago fue aprobado. ¡Nos vemos en el colectivo!';
+  if (resId) {
+    const b = document.createElement('div');
+    b.className = 'badge'; b.textContent = `Reserva #${resId}`;
+    card.appendChild(b);
+    const note = document.createElement('p');
+    note.style.marginTop = '10px'; note.style.fontSize = '.78rem';
+    note.textContent = 'Guardá este número y mostralo al subir.';
+    card.appendChild(note);
+  }
+} else if (path === '/failure') {
+  document.getElementById('ico').className = 'result-icon icon-error';
+  document.getElementById('ico').textContent = '❌';
+  document.getElementById('titulo').textContent = 'Pago no completado';
+  document.getElementById('desc').textContent = 'No se procesó el pago. El asiento fue liberado. Podés intentarlo de nuevo.';
+} else if (path === '/pending') {
+  document.getElementById('ico').className = 'result-icon icon-pending';
+  document.getElementById('ico').textContent = '⏳';
+  document.getElementById('titulo').textContent = 'Pago pendiente';
+  document.getElementById('desc').textContent = 'Tu pago está siendo procesado. Te avisamos cuando se confirme.';
+  if (resId) {
+    const b = document.createElement('div');
+    b.className = 'badge'; b.textContent = `Reserva #${resId} — pendiente`;
+    card.appendChild(b);
+  }
+}
+
+const btn = document.createElement('a');
+btn.href = '/'; btn.className = 'btn'; btn.textContent = '← Volver al inicio';
+card.appendChild(btn);
+</script>
+</body>
+</html>

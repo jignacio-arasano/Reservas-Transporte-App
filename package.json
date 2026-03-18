@@ -1,0 +1,14 @@
+{
+  "name": "colectivo-reservas",
+  "version": "1.0.0",
+  "description": "Sistema de reservas Patio Olmos → Campus Siglo 21",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "express": "^4.18.2",
+    "mercadopago": "^2.0.6"
+  }
+}
