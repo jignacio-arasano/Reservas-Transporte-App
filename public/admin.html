@@ -499,7 +499,7 @@ function renderSchedule() {
         <div class="trip-meta">${tipoBadge} ${v.origen} → ${v.destino}</div>
         <div class="trip-actions">
           <button class="btn-action btn-edit" onclick="pedirEdicion(${v.id},'${v.hora}','${v.tipo}')">✏️ Cambiar hora</button>
-          <button class="btn-action btn-danger" onclick="eliminarViaje(${v.id})">🗑️ Eliminar</button>
+          <button class="btn-action btn-danger" onclick="eliminarViaje(${v.id}, this)">🗑️ Eliminar</button>
         </div>
       </div>`;
     });
@@ -529,13 +529,37 @@ document.getElementById('btn-confirmar-edit').addEventListener('click', async ()
   else showToast('Error al actualizar', 'error');
 });
 
-async function eliminarViaje(id) {
+async function eliminarViaje(id, btn) {
+  // Remover visualmente al instante
+  const card = btn.closest('.trip-card');
+  const dayGroup = card.closest('.day-group');
+  card.style.transition = 'opacity .2s, transform .2s';
+  card.style.opacity = '0';
+  card.style.transform = 'translateX(20px)';
+
   const res = await fetch(`/api/admin/viajes/${id}`, {
     method: 'DELETE', headers: { 'x-admin-token': token }
   });
   const data = await res.json();
-  if (res.ok) { showToast('Viaje eliminado ✅', 'ok'); await loadViajes(); }
-  else showToast(data.error || 'No se puede eliminar', 'error');
+
+  if (res.ok) {
+    // Remover del DOM
+    setTimeout(() => {
+      card.remove();
+      // Si el día quedó sin viajes, remover el grupo entero
+      if (dayGroup && dayGroup.querySelectorAll('.trip-card').length === 0) {
+        dayGroup.remove();
+      }
+      // Actualizar allViajes también
+      allViajes = allViajes.filter(v => v.id !== id);
+    }, 200);
+    showToast('Viaje eliminado ✅', 'ok');
+  } else {
+    // Revertir si hubo error
+    card.style.opacity = '1';
+    card.style.transform = 'none';
+    showToast(data.error || 'No se puede eliminar', 'error');
+  }
 }
 
 async function agregarViaje() {
