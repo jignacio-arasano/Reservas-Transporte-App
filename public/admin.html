@@ -3,267 +3,570 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin · Reservas</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>Admin · Reservas Transporte Pablo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg: #080c14; --bg2: #0f1522; --bg3: #161e30;
       --border: rgba(255,255,255,.08); --border2: rgba(255,255,255,.13);
-      --amber: #f0a500; --amber2: #ffbe2e; --amber-dim: rgba(240,165,0,.1);
+      --amber: #f0a500; --amber-dim: rgba(240,165,0,.1);
       --green: #22c55e; --green-dim: rgba(34,197,94,.1);
+      --blue: #3b82f6; --blue-dim: rgba(59,130,246,.1);
       --red: #ef4444; --red-dim: rgba(239,68,68,.1);
       --yellow: #eab308; --yellow-dim: rgba(234,179,8,.1);
       --text: #f0f4ff; --text2: #8494b0; --text3: #4a5a72;
     }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg); color: var(--text); min-height: 100vh;
-    }
-    body::before {
-      content: ''; position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 0;
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+    /* ── Login ── */
+    #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
+      padding: 40px 32px; width: 100%; max-width: 360px; text-align: center;
+      animation: pop .35s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes pop { from{opacity:0;transform:scale(.92)} to{opacity:1;transform:scale(1)} }
+    .login-icon { width: 56px; height: 56px; background: var(--amber); border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+      margin: 0 auto 20px; box-shadow: 0 0 24px rgba(240,165,0,.4); }
+    .login-card h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 6px; }
+    .login-card p  { font-size: .82rem; color: var(--text2); margin-bottom: 24px; }
+    .login-card input { width: 100%; padding: 13px 14px; background: var(--bg3);
+      border: 1.5px solid var(--border); border-radius: 10px; color: var(--text);
+      font-size: 16px; font-family: 'Inter', sans-serif; margin-bottom: 12px; }
+    .login-card input:focus { outline: none; border-color: var(--amber); }
+    .login-btn { width: 100%; padding: 13px; background: var(--amber); color: #000;
+      border: none; border-radius: 10px; font-family: 'Syne', sans-serif;
+      font-size: .95rem; font-weight: 700; cursor: pointer; }
+    .login-error { color: var(--red); font-size: .8rem; margin-top: 10px; display: none; }
+
+    /* ── App ── */
+    #app-screen { display: none; }
     header {
-      position: relative; z-index: 10;
-      padding: 18px 28px; border-bottom: 1px solid var(--border);
-      background: rgba(8,12,20,.85); backdrop-filter: blur(12px);
-      display: flex; align-items: center; gap: 16px;
+      position: sticky; top: 0; z-index: 10; padding: 14px 20px;
+      border-bottom: 1px solid var(--border); background: rgba(8,12,20,.9);
+      backdrop-filter: blur(12px); display: flex; align-items: center; gap: 12px;
     }
-    .logo-icon {
-      width: 36px; height: 36px; background: var(--amber); border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; box-shadow: 0 0 16px rgba(240,165,0,.35); flex-shrink: 0;
-    }
-    header h1 { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; }
-    header span { font-size: .75rem; color: var(--text2); margin-left: 4px; }
+    .logo-icon { width: 34px; height: 34px; background: var(--amber); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    header h1 { font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700; }
+    .header-actions { margin-left: auto; display: flex; gap: 8px; }
+    .btn-sm { padding: 7px 12px; border-radius: 8px; font-size: .75rem; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all .2s;
+      border: 1px solid var(--border); background: var(--bg3); color: var(--text2); }
+    .btn-sm:hover { color: var(--text); border-color: var(--border2); }
+    .btn-sm.danger { color: var(--red); border-color: rgba(239,68,68,.2); }
+    .btn-sm.danger:hover { background: var(--red-dim); }
 
-    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-    .refresh-btn {
-      padding: 7px 14px; background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text2); font-size: .78rem;
-      cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s;
+    /* ── Nav tabs ── */
+    .nav-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      padding: 0 20px; background: var(--bg2);
     }
-    .refresh-btn:hover { border-color: var(--border2); color: var(--text); }
-    .back-link { font-size: .78rem; color: var(--text3); text-decoration: none; transition: color .2s; }
-    .back-link:hover { color: var(--text2); }
-
-    main {
-      position: relative; z-index: 5;
-      max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px;
-    }
-
-    /* ── Stats ── */
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
-    .stat {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 16px; padding: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.3);
-      animation: fadeIn .4s ease both;
-    }
-    .stat:nth-child(2) { animation-delay: .05s; }
-    .stat:nth-child(3) { animation-delay: .1s; }
-    .stat:nth-child(4) { animation-delay: .15s; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-
-    .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1; }
-    .stat-label { font-size: .72rem; color: var(--text3); margin-top: 6px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
-    .stat-total  .stat-num { color: var(--text); }
-    .stat-pagada .stat-num { color: var(--green); }
-    .stat-pend   .stat-num { color: var(--yellow); }
-    .stat-canc   .stat-num { color: var(--red); }
-
-    /* ── Filters ── */
-    .filters {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 14px; padding: 16px 20px;
-      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-      margin-bottom: 16px;
-    }
-    select, .search-input {
-      padding: 9px 14px; background: var(--bg3); border: 1.5px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: .85rem;
-      font-family: 'Inter', sans-serif; transition: border-color .2s;
-    }
-    select:focus, .search-input:focus { outline: none; border-color: var(--amber); }
-    .search-input { flex: 1; min-width: 200px; }
-    .search-input::placeholder { color: var(--text3); }
-    option { background: var(--bg3); }
-
-    .count-label { font-size: .78rem; color: var(--text3); margin-left: auto; }
-
-    /* ── Table ── */
-    .table-wrap {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 16px; overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0,0,0,.4);
-    }
-    table { width: 100%; border-collapse: collapse; }
-    thead tr { background: var(--bg3); }
-    th {
-      padding: 13px 16px; text-align: left;
-      font-size: .68rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--text3);
-      border-bottom: 1px solid var(--border);
+    .nav-tab {
+      padding: 12px 16px; font-size: .82rem; font-weight: 600; cursor: pointer;
+      border-bottom: 2px solid transparent; color: var(--text3); transition: all .2s;
       white-space: nowrap;
     }
-    td {
-      padding: 13px 16px; font-size: .85rem;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
+    .nav-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    main { max-width: 1000px; margin: 0 auto; padding: 20px 14px 60px; }
+
+    /* ── Stats ── */
+    .stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 20px; }
+    @media(min-width:480px){ .stats { grid-template-columns: repeat(4,1fr); } }
+    .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; line-height: 1; }
+    .stat-label { font-size: .68rem; color: var(--text3); margin-top: 5px; text-transform: uppercase; letter-spacing: .07em; }
+    .c-total  .stat-num { color: var(--text); }
+    .c-pagada .stat-num { color: var(--green); }
+    .c-pend   .stat-num { color: var(--yellow); }
+    .c-canc   .stat-num { color: var(--red); }
+
+    /* ── Filters / Table ── */
+    .filters { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    select, .search-inp { padding: 8px 12px; background: var(--bg3); border: 1.5px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: .83rem; font-family: 'Inter', sans-serif; }
+    select:focus, .search-inp:focus { outline: none; border-color: var(--amber); }
+    .search-inp { flex: 1; min-width: 160px; }
+    .search-inp::placeholder { color: var(--text3); }
+    option { background: var(--bg3); }
+    .count-lbl { font-size: .75rem; color: var(--text3); margin-left: auto; }
+
+    .table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: var(--bg3); }
+    th { padding: 11px 14px; text-align: left; font-size: .65rem; font-weight: 700;
+      letter-spacing: .09em; text-transform: uppercase; color: var(--text3);
+      border-bottom: 1px solid var(--border); }
+    td { padding: 11px 14px; font-size: .83rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tbody tr:last-child td { border-bottom: none; }
-    tbody tr { transition: background .15s; }
-    tbody tr:hover td { background: rgba(255,255,255,.025); }
-
-    .td-id { font-family: 'Syne', sans-serif; font-size: .8rem; color: var(--text3); }
+    tbody tr:hover td { background: rgba(255,255,255,.02); }
     .td-nombre { font-weight: 600; }
-    .td-email { color: var(--text2); font-size: .8rem; }
-    .td-hora { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--amber); }
-    .td-asiento {
-      font-family: 'Syne', sans-serif; font-weight: 800; font-size: .9rem;
-      color: var(--text);
-    }
+    .td-hora   { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--amber); }
 
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
-    }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 20px;
+      font-size: .68rem; font-weight: 700; text-transform: uppercase; }
     .badge-pagada    { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(34,197,94,.2); }
     .badge-pendiente { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(234,179,8,.2); }
     .badge-cancelada { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(239,68,68,.2); }
+    .badge-ida    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,.2); }
+    .badge-vuelta { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(59,130,246,.2); }
 
-    .empty { padding: 60px; text-align: center; color: var(--text3); }
-
-    @media(max-width: 640px) {
-      .hide-mobile { display: none; }
-      .stat-num { font-size: 1.7rem; }
+    .btn-action {
+      padding: 5px 10px; background: transparent; border-radius: 7px;
+      font-size: .72rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s;
+      white-space: nowrap;
     }
+    .btn-danger { border: 1px solid rgba(239,68,68,.3); color: var(--red); }
+    .btn-danger:hover { background: var(--red-dim); }
+    .btn-edit { border: 1px solid rgba(240,165,0,.3); color: var(--amber); }
+    .btn-edit:hover { background: var(--amber-dim); }
+
+    .empty { padding: 48px; text-align: center; color: var(--text3); }
+
+    /* ── Gestión de horarios ── */
+    .schedule-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+    }
+    .schedule-header h2 { font-family: 'Syne', sans-serif; font-size: .95rem; }
+
+    .add-trip-form {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px; margin-bottom: 20px;
+    }
+    .add-trip-form h3 { font-family: 'Syne', sans-serif; font-size: .85rem; margin-bottom: 14px; color: var(--amber); }
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    .form-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 120px; }
+    .form-field label { font-size: .68rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .05em; color: var(--text2); }
+    .form-field input, .form-field select {
+      padding: 9px 12px; background: var(--bg3); border: 1.5px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: .85rem;
+      font-family: 'Inter', sans-serif; width: 100%;
+    }
+    .form-field input:focus, .form-field select:focus { outline: none; border-color: var(--amber); }
+    .btn-add { padding: 9px 20px; background: var(--amber); color: #000; border: none;
+      border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: .85rem; cursor: pointer; white-space: nowrap; }
+
+    .day-group { margin-bottom: 20px; }
+    .day-group-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+    .day-group-header h3 { font-family: 'Syne', sans-serif; font-size: .85rem; font-weight: 700; text-transform: capitalize; }
+    .trips-list { display: flex; flex-direction: column; gap: 8px; }
+    .trip-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .trip-card .trip-hora-big { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; min-width: 60px; }
+    .trip-card .trip-meta { flex: 1; font-size: .78rem; color: var(--text2); }
+    .trip-card .trip-actions { display: flex; gap: 8px; }
+
+    /* Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex;
+      align-items: center; justify-content: center; z-index: 200; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+      padding: 28px; max-width: 340px; width: 100%; text-align: center; }
+    .modal h3 { font-family: 'Syne', sans-serif; margin-bottom: 8px; }
+    .modal p  { color: var(--text2); font-size: .85rem; margin-bottom: 20px; }
+    .modal input { width: 100%; padding: 11px; background: var(--bg3); border: 1.5px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 16px; font-family: 'Inter', sans-serif;
+      margin-bottom: 16px; text-align: center; font-size: 1.1rem; }
+    .modal input:focus { outline: none; border-color: var(--amber); }
+    .modal-btns { display: flex; gap: 10px; }
+    .modal-btns button { flex: 1; padding: 11px; border-radius: 9px; border: none;
+      font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; font-size: .88rem; }
+    .btn-confirm-modal { background: var(--amber); color: #000; }
+    .btn-cancel-modal  { background: var(--bg3); color: var(--text2); }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--bg2); border: 1px solid var(--border2); color: var(--text);
+      padding: 12px 20px; border-radius: 30px; font-size: .83rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5); z-index: 300;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; max-width: 90vw; }
+    .toast.show  { transform: translateX(-50%) translateY(0); }
+    .toast.ok    { border-color: rgba(34,197,94,.4); color: var(--green); }
+    .toast.error { border-color: rgba(239,68,68,.4); color: var(--red); }
+
+    @media(max-width:600px){ .hide-m { display: none; } }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-icon">🚌</div>
-  <div>
-    <h1>Panel de Administración <span>· Transporte Reservas</span></h1>
+<!-- Login -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <h1>Panel de Administración</h1>
+    <p>Ingresá la contraseña para continuar</p>
+    <input type="password" id="inp-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter') doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="login-error">Contraseña incorrecta</div>
   </div>
-  <div class="header-actions">
-    <button class="refresh-btn" onclick="loadData()">↻ Actualizar</button>
-    <a href="/" class="back-link">← App</a>
-  </div>
-</header>
+</div>
 
-<main>
-  <div class="stats">
-    <div class="stat stat-total">
-      <div class="stat-num" id="s-total">—</div>
-      <div class="stat-label">Total reservas</div>
+<!-- App -->
+<div id="app-screen">
+  <header>
+    <div class="logo-icon">🚌</div>
+    <h1>Panel Admin</h1>
+    <div class="header-actions">
+      <button class="btn-sm" onclick="loadAll()">↻</button>
+      <a href="/" class="btn-sm">← App</a>
+      <button class="btn-sm danger" onclick="logout()">Salir</button>
     </div>
-    <div class="stat stat-pagada">
-      <div class="stat-num" id="s-pagadas">—</div>
-      <div class="stat-label">Pagadas</div>
-    </div>
-    <div class="stat stat-pend">
-      <div class="stat-num" id="s-pendientes">—</div>
-      <div class="stat-label">Pendientes</div>
-    </div>
-    <div class="stat stat-canc">
-      <div class="stat-num" id="s-canceladas">—</div>
-      <div class="stat-label">Canceladas</div>
-    </div>
-  </div>
+  </header>
 
-  <div class="filters">
-    <select id="filtro-estado" onchange="filtrar()">
-      <option value="">Todos los estados</option>
-      <option value="pagada">✅ Pagadas</option>
-      <option value="pendiente">⏳ Pendientes</option>
-      <option value="cancelada">❌ Canceladas</option>
-    </select>
-    <input class="search-input" type="text" id="filtro-buscar"
-      placeholder="Buscar por nombre o email..." oninput="filtrar()"/>
-    <span class="count-label" id="count-label"></span>
+  <!-- Tabs -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('reservas')">📋 Reservas</div>
+    <div class="nav-tab" onclick="switchTab('horarios')">🕐 Gestionar Horarios</div>
   </div>
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Pasajero</th>
-          <th class="hide-mobile">Email</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Asiento</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="7" class="empty">Cargando...</td></tr>
-      </tbody>
-    </table>
+  <main>
+
+    <!-- TAB: Reservas -->
+    <div class="tab-content active" id="tab-reservas">
+      <div class="stats">
+        <div class="stat c-total"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total</div></div>
+        <div class="stat c-pagada"><div class="stat-num" id="s-pagadas">—</div><div class="stat-label">Pagadas</div></div>
+        <div class="stat c-pend"><div class="stat-num" id="s-pend">—</div><div class="stat-label">Pendientes</div></div>
+        <div class="stat c-canc"><div class="stat-num" id="s-canc">—</div><div class="stat-label">Canceladas</div></div>
+      </div>
+      <div class="filters">
+        <select id="filtro-estado" onchange="filtrar()">
+          <option value="">Todos</option>
+          <option value="pagada">✅ Pagadas</option>
+          <option value="pendiente">⏳ Pendientes</option>
+          <option value="cancelada">❌ Canceladas</option>
+        </select>
+        <select id="filtro-tipo" onchange="filtrar()">
+          <option value="">Ida y Vuelta</option>
+          <option value="ida">🟢 Ida</option>
+          <option value="vuelta">🔵 Vuelta</option>
+        </select>
+        <input class="search-inp" type="text" id="filtro-buscar" placeholder="Buscar..." oninput="filtrar()"/>
+        <span class="count-lbl" id="count-lbl"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Pasajero</th><th class="hide-m">Email</th>
+              <th>Tipo</th><th>Fecha</th><th>Hora</th><th>Asiento</th><th>Estado</th><th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"><tr><td colspan="9" class="empty">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: Horarios -->
+    <div class="tab-content" id="tab-horarios">
+
+      <!-- Agregar viaje -->
+      <div class="add-trip-form">
+        <h3>➕ Agregar viaje</h3>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Fecha</label>
+            <input type="date" id="new-fecha"/>
+          </div>
+          <div class="form-field">
+            <label>Horario</label>
+            <input type="time" id="new-hora"/>
+          </div>
+          <div class="form-field">
+            <label>Tipo</label>
+            <select id="new-tipo">
+              <option value="ida">🟢 Ida (Patio Olmos → Siglo 21)</option>
+              <option value="vuelta">🔵 Vuelta (Siglo 21 → Patio Olmos)</option>
+            </select>
+          </div>
+          <button class="btn-add" onclick="agregarViaje()">Agregar</button>
+        </div>
+      </div>
+
+      <!-- Lista de viajes por día -->
+      <div id="schedule-list"><p style="color:var(--text3)">Cargando horarios...</p></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal cancelar reserva -->
+<div class="modal-overlay" id="modal-cancelar">
+  <div class="modal">
+    <h3>⚠️ Liberar asiento</h3>
+    <p id="modal-cancel-texto"></p>
+    <div class="modal-btns">
+      <button class="btn-cancel-modal" onclick="cerrarModal('modal-cancelar')">Volver</button>
+      <button class="btn-confirm-modal" id="btn-confirmar-cancel" style="background:var(--red);color:white">Liberar</button>
+    </div>
   </div>
-</main>
+</div>
+
+<!-- Modal editar hora -->
+<div class="modal-overlay" id="modal-editar">
+  <div class="modal">
+    <h3>✏️ Cambiar horario</h3>
+    <p id="modal-edit-texto">Nuevo horario para este viaje:</p>
+    <input type="time" id="modal-nueva-hora"/>
+    <div class="modal-btns">
+      <button class="btn-cancel-modal" onclick="cerrarModal('modal-editar')">Cancelar</button>
+      <button class="btn-confirm-modal" id="btn-confirmar-edit">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
+let token   = sessionStorage.getItem('admin_token') || '';
 let allData = [];
+let allViajes = [];
+let cancelId  = null;
+let editId    = null;
 
-async function loadData() {
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Login ─────────────────────────────────────────────────────
+async function doLogin() {
+  const pass = document.getElementById('inp-pass').value;
+  const err  = document.getElementById('login-error');
+  err.style.display = 'none';
   try {
-    const res = await fetch('/api/admin/reservas');
-    allData   = await res.json();
-    updateStats();
-    filtrar();
-  } catch(e) {
-    document.getElementById('tbody').innerHTML =
-      '<tr><td colspan="7" class="empty">⚠️ Error al cargar datos</td></tr>';
-  }
+    const res  = await fetch('/api/admin/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pass })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      token = data.token;
+      sessionStorage.setItem('admin_token', token);
+      mostrarApp();
+    } else { err.style.display = 'block'; }
+  } catch(e) { err.textContent = 'Error de conexión'; err.style.display = 'block'; }
+}
+
+function logout() {
+  sessionStorage.removeItem('admin_token'); token = '';
+  document.getElementById('app-screen').style.display   = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('inp-pass').value = '';
+}
+
+function mostrarApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display   = 'block';
+  loadAll();
+}
+
+if (token) mostrarApp();
+
+// ── Tabs ──────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach((el, i) => {
+    el.className = 'nav-tab' + (['reservas','horarios'][i] === tab ? ' active' : '');
+  });
+  document.getElementById('tab-reservas').className = 'tab-content' + (tab === 'reservas' ? ' active' : '');
+  document.getElementById('tab-horarios').className = 'tab-content' + (tab === 'horarios' ? ' active' : '');
+  if (tab === 'horarios') loadViajes();
+}
+
+async function loadAll() {
+  await Promise.all([loadReservas(), loadViajes()]);
+}
+
+// ── Reservas ──────────────────────────────────────────────────
+async function loadReservas() {
+  try {
+    const res = await fetch('/api/admin/reservas', { headers: { 'x-admin-token': token } });
+    if (res.status === 401) { logout(); return; }
+    allData = await res.json();
+    updateStats(); filtrar();
+  } catch(e) {}
 }
 
 function updateStats() {
-  document.getElementById('s-total').textContent      = allData.length;
-  document.getElementById('s-pagadas').textContent    = allData.filter(r => r.estado === 'pagada').length;
-  document.getElementById('s-pendientes').textContent = allData.filter(r => r.estado === 'pendiente').length;
-  document.getElementById('s-canceladas').textContent = allData.filter(r => r.estado === 'cancelada').length;
+  document.getElementById('s-total').textContent   = allData.length;
+  document.getElementById('s-pagadas').textContent = allData.filter(r => r.estado === 'pagada').length;
+  document.getElementById('s-pend').textContent    = allData.filter(r => r.estado === 'pendiente').length;
+  document.getElementById('s-canc').textContent    = allData.filter(r => r.estado === 'cancelada').length;
 }
 
 function filtrar() {
   const estado = document.getElementById('filtro-estado').value;
+  const tipo   = document.getElementById('filtro-tipo').value;
   const buscar = document.getElementById('filtro-buscar').value.toLowerCase();
-  let filtered = allData;
-  if (estado)  filtered = filtered.filter(r => r.estado === estado);
-  if (buscar)  filtered = filtered.filter(r =>
-    r.nombre.toLowerCase().includes(buscar) || r.email.toLowerCase().includes(buscar));
+  let f = allData;
+  if (estado) f = f.filter(r => r.estado === estado);
+  if (tipo)   f = f.filter(r => r.tipo   === tipo);
+  if (buscar) f = f.filter(r => r.nombre.toLowerCase().includes(buscar) || r.email.toLowerCase().includes(buscar));
 
-  document.getElementById('count-label').textContent =
-    filtered.length + ' resultado' + (filtered.length !== 1 ? 's' : '');
+  document.getElementById('count-lbl').textContent = f.length + ' resultado' + (f.length !== 1 ? 's' : '');
 
   const tbody = document.getElementById('tbody');
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">Sin resultados</td></tr>';
-    return;
-  }
+  if (!f.length) { tbody.innerHTML = '<tr><td colspan="9" class="empty">Sin resultados</td></tr>'; return; }
 
-  tbody.innerHTML = filtered.map(r => {
-    const fecha = r.fecha ? new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-AR',
+  tbody.innerHTML = f.map(r => {
+    const fecha  = r.fecha ? new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-AR',
       { weekday: 'short', day: 'numeric', month: 'short' }) : '—';
+    const accion = r.estado !== 'cancelada'
+      ? `<button class="btn-action btn-danger" onclick="pedirCancelacion(${r.id},'${r.nombre}',${r.asiento})">Liberar</button>`
+      : '<span style="color:var(--text3)">—</span>';
     return `<tr>
-      <td class="td-id">#${r.id}</td>
+      <td style="color:var(--text3);font-size:.78rem">#${r.id}</td>
       <td class="td-nombre">${r.nombre}</td>
-      <td class="td-email hide-mobile">${r.email}</td>
+      <td class="hide-m" style="color:var(--text2);font-size:.78rem">${r.email}</td>
+      <td><span class="badge badge-${r.tipo || 'ida'}">${r.tipo || 'ida'}</span></td>
       <td>${fecha}</td>
       <td class="td-hora">${r.hora || '—'}</td>
-      <td class="td-asiento">💺 ${r.asiento}</td>
+      <td style="font-family:'Syne',sans-serif;font-weight:800">💺${r.asiento}</td>
       <td><span class="badge badge-${r.estado}">${r.estado}</span></td>
+      <td>${accion}</td>
     </tr>`;
   }).join('');
 }
 
-loadData();
-setInterval(loadData, 30000);
+function pedirCancelacion(id, nombre, asiento) {
+  cancelId = id;
+  document.getElementById('modal-cancel-texto').textContent =
+    `¿Liberar el asiento ${asiento} de ${nombre}?`;
+  document.getElementById('modal-cancelar').classList.add('show');
+}
+
+document.getElementById('btn-confirmar-cancel').addEventListener('click', async () => {
+  if (!cancelId) return;
+  cerrarModal('modal-cancelar');
+  const res = await fetch(`/api/admin/cancelar/${cancelId}`, {
+    method: 'POST', headers: { 'x-admin-token': token }
+  });
+  if (res.ok) { showToast('Asiento liberado ✅', 'ok'); await loadReservas(); }
+  else showToast('Error al cancelar', 'error');
+});
+
+// ── Horarios ──────────────────────────────────────────────────
+async function loadViajes() {
+  try {
+    const res = await fetch('/api/admin/viajes', { headers: { 'x-admin-token': token } });
+    if (!res.ok) return;
+    allViajes = await res.json();
+    renderSchedule();
+  } catch(e) {}
+}
+
+function renderSchedule() {
+  if (!allViajes.length) {
+    document.getElementById('schedule-list').innerHTML = '<p style="color:var(--text3)">No hay viajes cargados.</p>';
+    return;
+  }
+
+  // Agrupar por fecha
+  const byDate = {};
+  allViajes.forEach(v => {
+    if (!byDate[v.fecha]) byDate[v.fecha] = [];
+    byDate[v.fecha].push(v);
+  });
+
+  let html = '';
+  Object.entries(byDate).forEach(([fecha, viajes]) => {
+    const fechaFmt = new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR',
+      { weekday: 'long', day: 'numeric', month: 'long' });
+    html += `<div class="day-group">
+      <div class="day-group-header"><h3>${fechaFmt}</h3></div>
+      <div class="trips-list">`;
+
+    viajes.forEach(v => {
+      const tipoBadge = `<span class="badge badge-${v.tipo}">${v.tipo === 'ida' ? '🟢 Ida' : '🔵 Vuelta'}</span>`;
+      html += `<div class="trip-card">
+        <div class="trip-hora-big">${v.hora}</div>
+        <div class="trip-meta">${tipoBadge} ${v.origen} → ${v.destino}</div>
+        <div class="trip-actions">
+          <button class="btn-action btn-edit" onclick="pedirEdicion(${v.id},'${v.hora}','${v.tipo}')">✏️ Cambiar hora</button>
+          <button class="btn-action btn-danger" onclick="eliminarViaje(${v.id})">🗑️ Eliminar</button>
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+
+  document.getElementById('schedule-list').innerHTML = html;
+}
+
+function pedirEdicion(id, hora, tipo) {
+  editId = id;
+  document.getElementById('modal-edit-texto').textContent =
+    `Nuevo horario para el viaje de ${tipo === 'ida' ? 'ida' : 'vuelta'}:`;
+  document.getElementById('modal-nueva-hora').value = hora;
+  document.getElementById('modal-editar').classList.add('show');
+}
+
+document.getElementById('btn-confirmar-edit').addEventListener('click', async () => {
+  const hora = document.getElementById('modal-nueva-hora').value;
+  if (!hora) return;
+  cerrarModal('modal-editar');
+  const res = await fetch(`/api/admin/viajes/${editId}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+    body: JSON.stringify({ hora })
+  });
+  if (res.ok) { showToast('Horario actualizado ✅', 'ok'); await loadViajes(); }
+  else showToast('Error al actualizar', 'error');
+});
+
+async function eliminarViaje(id) {
+  const res = await fetch(`/api/admin/viajes/${id}`, {
+    method: 'DELETE', headers: { 'x-admin-token': token }
+  });
+  const data = await res.json();
+  if (res.ok) { showToast('Viaje eliminado ✅', 'ok'); await loadViajes(); }
+  else showToast(data.error || 'No se puede eliminar', 'error');
+}
+
+async function agregarViaje() {
+  const fecha = document.getElementById('new-fecha').value;
+  const hora  = document.getElementById('new-hora').value;
+  const tipo  = document.getElementById('new-tipo').value;
+  if (!fecha || !hora) { showToast('Completá fecha y horario', 'error'); return; }
+
+  const res = await fetch('/api/admin/viajes', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+    body: JSON.stringify({ fecha, hora, tipo })
+  });
+  if (res.ok) {
+    showToast('Viaje agregado ✅', 'ok');
+    document.getElementById('new-fecha').value = '';
+    document.getElementById('new-hora').value  = '';
+    await loadViajes();
+  } else {
+    const d = await res.json();
+    showToast(d.error || 'Error', 'error');
+  }
+}
+
+function cerrarModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === e.currentTarget) m.classList.remove('show'); });
+});
+
+setInterval(loadReservas, 30000);
 </script>
 </body>
 </html>
