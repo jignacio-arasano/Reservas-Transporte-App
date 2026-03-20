@@ -200,6 +200,7 @@
     .toast.error { border-color: rgba(239,68,68,.4); color: var(--red); }
 
     @media(max-width:600px){ .hide-m { display: none; } }
+    @media(min-width:601px){ .show-m { display: none; } }
 
     /* ── Facturación ── */
     .fact-mes {
@@ -305,7 +306,7 @@
           <thead>
             <tr>
               <th>#</th><th>Pasajero</th><th class="hide-m">Email</th>
-              <th>Tipo</th><th>Fecha</th><th>Hora</th><th>Asiento</th><th>Estado</th><th>Acción</th>
+              <th class="hide-m">Tipo</th><th class="hide-m">Fecha</th><th class="hide-m">Hora</th><th class="hide-m">Asiento</th><th>Estado</th><th>Acción</th>
             </tr>
           </thead>
           <tbody id="tbody"><tr><td colspan="9" class="empty">Cargando...</td></tr></tbody>
@@ -576,12 +577,12 @@ function filtrar() {
       : '<span style="color:var(--text3)">—</span>';
     return `<tr>
       <td style="color:var(--text3);font-size:.78rem">#${r.id}</td>
-      <td class="td-nombre">${r.nombre}</td>
+      <td class="td-nombre">${r.nombre}<div class="show-m" style="font-size:.7rem;color:var(--text2);margin-top:2px">${r.tipo || 'ida'} · ${fecha} ${r.hora || ''} · 💺${r.asiento}</div></td>
       <td class="hide-m" style="color:var(--text2);font-size:.78rem">${r.email}</td>
-      <td><span class="badge badge-${r.tipo || 'ida'}">${r.tipo || 'ida'}</span></td>
-      <td>${fecha}</td>
-      <td class="td-hora">${r.hora || '—'}</td>
-      <td style="font-family:'Syne',sans-serif;font-weight:800">💺${r.asiento}</td>
+      <td class="hide-m"><span class="badge badge-${r.tipo || 'ida'}">${r.tipo || 'ida'}</span></td>
+      <td class="hide-m">${fecha}</td>
+      <td class="hide-m td-hora">${r.hora || '—'}</td>
+      <td class="hide-m" style="font-family:'Syne',sans-serif;font-weight:800">💺${r.asiento}</td>
       <td><span class="badge badge-${r.estado}">${r.estado}</span></td>
       <td>${accion}</td>
     </tr>`;
