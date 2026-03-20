@@ -374,7 +374,7 @@ app.get('/api/admin/viajes', authAdmin, async (req, res) => {
   if (!supabase) return res.status(500).json({ error: 'Sin Supabase' });
   const hoy = new Date().toISOString().split('T')[0];
   const { data, error } = await supabase.from('viajes').select('*')
-    .gte('fecha', hoy).order('fecha').order('hora').limit(200);
+    .eq('activo', true).gte('fecha', hoy).order('fecha').order('hora').limit(200);
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
