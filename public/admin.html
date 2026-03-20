@@ -200,6 +200,46 @@
     .toast.error { border-color: rgba(239,68,68,.4); color: var(--red); }
 
     @media(max-width:600px){ .hide-m { display: none; } }
+
+    /* ── Facturación ── */
+    .fact-mes {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; margin-bottom: 14px; overflow: hidden;
+    }
+    .fact-mes-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; cursor: pointer; transition: background .2s;
+    }
+    .fact-mes-header:hover { background: rgba(255,255,255,.02); }
+    .fact-mes-titulo {
+      font-family: "Syne", sans-serif; font-size: 1rem; font-weight: 700;
+      text-transform: capitalize;
+    }
+    .fact-mes-total {
+      font-family: "Syne", sans-serif; font-size: 1.2rem; font-weight: 800;
+      color: var(--green);
+    }
+    .fact-mes-body { display: none; border-top: 1px solid var(--border); }
+    .fact-mes-body.open { display: block; }
+    .fact-mes-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 20px; border-bottom: 1px solid var(--border); font-size: .84rem;
+    }
+    .fact-mes-row:last-child { border-bottom: none; }
+    .fact-mes-row span:first-child { color: var(--text2); }
+    .fact-mes-row span:last-child { font-weight: 600; }
+    .fact-resumen {
+      display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 20px;
+    }
+    @media(min-width:480px){ .fact-resumen { grid-template-columns: repeat(3,1fr); } }
+    .fact-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; text-align: center;
+    }
+    .fact-card .n { font-family: "Syne", sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--green); }
+    .fact-card .l { font-size: .68rem; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: .07em; }
+    .mes-chevron { color: var(--text3); font-size: .8rem; transition: transform .2s; }
+    .mes-chevron.open { transform: rotate(180deg); }
   </style>
 </head>
 <body>
@@ -231,7 +271,8 @@
   <!-- Tabs -->
   <div class="nav-tabs">
     <div class="nav-tab active" onclick="switchTab('reservas')">📋 Reservas</div>
-    <div class="nav-tab" onclick="switchTab('horarios')">🕐 Gestionar Horarios</div>
+    <div class="nav-tab" onclick="switchTab('horarios')">🕐 Horarios</div>
+    <div class="nav-tab" onclick="switchTab('facturacion')">💰 Facturación</div>
   </div>
 
   <main>
@@ -300,6 +341,11 @@
 
       <!-- Lista de viajes por día -->
       <div id="schedule-list"><p style="color:var(--text3)">Cargando horarios...</p></div>
+    </div>
+
+    <!-- TAB: Facturación -->
+    <div class="tab-content" id="tab-facturacion">
+      <div id="facturacion-content"><p style="color:var(--text3)">Cargando...</p></div>
     </div>
 
   </main>
@@ -381,13 +427,111 @@ if (token) mostrarApp();
 
 // ── Tabs ──────────────────────────────────────────────────────
 function switchTab(tab) {
+  const tabs = ['reservas','horarios','facturacion'];
   document.querySelectorAll('.nav-tab').forEach((el, i) => {
-    el.className = 'nav-tab' + (['reservas','horarios'][i] === tab ? ' active' : '');
+    el.className = 'nav-tab' + (tabs[i] === tab ? ' active' : '');
   });
-  document.getElementById('tab-reservas').className = 'tab-content' + (tab === 'reservas' ? ' active' : '');
-  document.getElementById('tab-horarios').className = 'tab-content' + (tab === 'horarios' ? ' active' : '');
+  tabs.forEach(t => {
+    document.getElementById('tab-' + t).className = 'tab-content' + (t === tab ? ' active' : '');
+  });
   if (tab === 'horarios') loadViajes();
+  if (tab === 'facturacion') renderFacturacion();
 }
+
+function renderFacturacion() {
+  const pagadas = allData.filter(r => r.estado === 'pagada');
+  const precio  = 3300; // mismo que PRECIO_ASIENTO
+
+  // Agrupar por mes
+  const porMes = {};
+  pagadas.forEach(r => {
+    if (!r.fecha) return;
+    const mes = r.fecha.slice(0, 7); // YYYY-MM
+    if (!porMes[mes]) porMes[mes] = [];
+    porMes[mes].push(r);
+  });
+
+  // Ordenar meses desc
+  const meses = Object.keys(porMes).sort().reverse();
+
+  if (!meses.length) {
+    document.getElementById('facturacion-content').innerHTML =
+      '<p style="color:var(--text3);padding:20px 0">Todavía no hay reservas pagadas.</p>';
+    return;
+  }
+
+  const totalGeneral = pagadas.length * precio;
+  const mesActual    = new Date().toISOString().slice(0, 7);
+  const pagadasMesActual = (porMes[mesActual] || []).length;
+
+  // Resumen
+  let html = `<div class="fact-resumen">
+    <div class="fact-card">
+      <div class="n">${fmtPrecio(pagadasMesActual * precio)}</div>
+      <div class="l">Este mes</div>
+    </div>
+    <div class="fact-card">
+      <div class="n">${pagadasMesActual}</div>
+      <div class="l">Reservas este mes</div>
+    </div>
+    <div class="fact-card">
+      <div class="n">${fmtPrecio(totalGeneral)}</div>
+      <div class="l">Total histórico</div>
+    </div>
+  </div>`;
+
+  // Detalle por mes
+  meses.forEach(mes => {
+    const reservas = porMes[mes];
+    const total    = reservas.length * precio;
+    const fecha    = new Date(mes + '-15');
+    const label    = fecha.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+
+    // Agrupar por día dentro del mes
+    const porDia = {};
+    reservas.forEach(r => {
+      if (!porDia[r.fecha]) porDia[r.fecha] = 0;
+      porDia[r.fecha]++;
+    });
+    const dias = Object.keys(porDia).sort().reverse();
+
+    html += `<div class="fact-mes">
+      <div class="fact-mes-header" onclick="toggleMes(this)">
+        <div>
+          <div class="fact-mes-titulo">${label}</div>
+          <div style="font-size:.75rem;color:var(--text2);margin-top:2px">${reservas.length} reserva${reservas.length !== 1 ? 's' : ''} pagada${reservas.length !== 1 ? 's' : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="fact-mes-total">${fmtPrecio(total)}</div>
+          <span class="mes-chevron">▼</span>
+        </div>
+      </div>
+      <div class="fact-mes-body">`;
+
+    dias.forEach(dia => {
+      const cant     = porDia[dia];
+      const diaFmt   = new Date(dia + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
+      html += `<div class="fact-mes-row">
+        <span>${diaFmt}</span>
+        <span>${cant} reserva${cant !== 1 ? 's' : ''} · ${fmtPrecio(cant * precio)}</span>
+      </div>`;
+    });
+
+    html += '</div></div>';
+  });
+
+  document.getElementById('facturacion-content').innerHTML = html;
+}
+
+function toggleMes(header) {
+  const body     = header.nextElementSibling;
+  const chevron  = header.querySelector('.mes-chevron');
+  const isOpen   = body.classList.contains('open');
+  body.classList.toggle('open');
+  chevron.classList.toggle('open', !isOpen);
+}
+
+function fmtPrecio(n) { return '$' + Number(n).toLocaleString('es-AR'); }
 
 async function loadAll() {
   await Promise.all([loadReservas(), loadViajes()]);
